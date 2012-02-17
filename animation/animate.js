@@ -25,30 +25,8 @@ $(document).ready(function() {
 		mino : [4, 0, 1, 1]
 	});
 
-	// Declare a Component called "animation"
-	Crafty.c("animation", {
-		init : function() {
-			// If the "animate" component is not added to this one, then add it
-			if(!this.has("animate")) {
-				this.addComponent("animate");
-			}
-
-			// Bind the "enterframe" event, called every time the frame is displayed
-			this.bind("enterframe", function() {
-				// If the animation is not playing anymore, then reload it
-				if(!this.isPlaying("anim")) {
-					this.sprite(4, 0, 1, 1);
-					// Go back to the first sprite of the animation
-					this.animate("anim", 20);
-					// Launch the animation, changing sprite every 20ms
-				}
-			});
-		}
-	});
-
 	// Create a new entity which is a mino (previously declared sprite),
-	// an animation (previously declared component), a 2D and a DOM element.
-	var minot = Crafty.e("2D, DOM, mino, SpriteAnimation")
+	var mino = Crafty.e("2D, DOM, mino, SpriteAnimation")
 						.attr({x : 0, y : 0, w : 128, h : 128 })// Set the position
 						.animate("anim", 5, 0, 11)				// starting from coordinate x=5 and going to x=11, with y=0
 						.animate("anim", 20, -1);
