@@ -44,10 +44,11 @@ $(document).ready(function() {
 		grass22 : [2, 5, 1, 1],
 		grass23 : [3, 5, 1, 1]
 	});
+	
 	/*
 	 * Declare visible heights of the vertices for correct mapping
+	 * As with css its a clockwise declaration. 1 for hi, 0 for low.  
 	 */
-
 	var tileVisuals = [
 						[1, 1, 1, 1], 
 						[1, 1, 1, 1], 
@@ -74,17 +75,21 @@ $(document).ready(function() {
 						[0, 0, 0, 0], 
 						[0, 0, 0, 0]
 					];
-					
+
+	/*
+	 * This multidimensional array will hold the visuals for the whole map.
+	 * You can store this per tile, but I dont know how to read it out based on position.
+	 */
 	var mapArray = [];
 
-		for(var y = 0; y < height / spriteSize * 3; y++) {
+	for(var y = 0; y < height / spriteSize * 3; y++) {
 		mapArray[y] = [];
 		for(var x = 0; x < width / spriteSize - 1; x++) {
-			var noMatch = true;
+			var noMatch = false;
 			var tileNumber = 0;
-			
-			while(noMatch) {
-				noMatch = false;
+
+			do {
+				noMatch = false; //reset to false to avoid infinite loop and too much elses.
 				tileNumber = Crafty.math.randomInt(0, 23);
 
 				//horizontal x-direction matching
@@ -93,7 +98,7 @@ $(document).ready(function() {
 						noMatch = true;
 					}
 				}
-				
+
 				//vertical y-direction matching
 				if(y > 1) {
 					if(mapArray[y-2][x][2] != tileVisuals[tileNumber][0]) {
@@ -101,44 +106,53 @@ $(document).ready(function() {
 					}
 				}
 
-				if(y > 0 && y % 2 === 1) {
-					if(x === 0 || !mapArray[y-1][x + 1]) {
-						if(mapArray[y-1][x][2] != tileVisuals[tileNumber][3]) {
-							noMatch = true;
-						}
-						if(mapArray[y-1][x][1] != tileVisuals[tileNumber][0]) {
-							noMatch = true;
-						}
-					}
-					if(mapArray[y-1][x + 1]) {
+				//skip matching if its already clear there is no match and if its the first line(y=0)
+				if(!noMatch && y > 0) {
+					/* 
+					 * On even lines, match to the upper neighbour 3th edge (visuals 3 and 2)
+					 */
+					if(y % 2 === 0) {
 
-						if(mapArray[y-1][x+1][3] != tileVisuals[tileNumber][0]) {
-							noMatch = true;
-						}
-						if(mapArray[y-1][x+1][2] != tileVisuals[tileNumber][1]) {
-							noMatch = true;
-						}
-					}
-
-				}
-				//2-0 1-0
-				if(y > 0 && y % 2 === 0) {
-					
 						if(mapArray[y-1][x][3] != tileVisuals[tileNumber][0]) {
 							noMatch = true;
 						}
 						if(mapArray[y-1][x][2] != tileVisuals[tileNumber][1]) {
 							noMatch = true;
 						}
+					}
+					/*
+					 * On odd lines, do some odd logic. 
+					 */					 
+					if(y % 2 === 1) {
+						if(x === 0 || !mapArray[y-1][x + 1]) {
+							if(mapArray[y-1][x][2] != tileVisuals[tileNumber][3]) {
+								noMatch = true;
+							}
+						}
+						if(mapArray[y-1][x + 1]) {
+							if(mapArray[y-1][x+1][3] != tileVisuals[tileNumber][0]) {
+								noMatch = true;
+							}
+							if(mapArray[y-1][x+1][2] != tileVisuals[tileNumber][1]) {
+								noMatch = true;
+							}
+						}
+					}
 				}
-			}
+			} while(noMatch)
+
 			mapArray[y][x] = tileVisuals[tileNumber];
 
 			var tileType = 'grass' + tileNumber;
 
-			var tile = Crafty.e('2D, DOM,' + tileType).addComponent("Mouse").attr("id", String(y) + "-" + String(x)).attr("name", tileType).areaMap([32, 16], [64, 32], [32, 48], [0, 32]).bind('Click', function() {
-				console.log(this.attr("id"));
-				this.destroy();
+			var tile = Crafty.e('2D, DOM,' + tileType)
+								.addComponent("Mouse")
+								.attr("id", String(y) + "-" + String(x))
+								.attr("name", tileType)
+								.areaMap([32, 16], [64, 32], [32, 48], [0, 32])
+								.bind('Click', function() {
+									console.log(this.attr("id"));
+								this.destroy();
 			});
 			iso.place(x, y, 0, tile);
 		}
