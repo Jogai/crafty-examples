@@ -9,12 +9,12 @@
  * @version 1.0 */
 /*globals $, Crafty, console, window */
 $(document).ready(function() {
-	
+
 	window.width = 1280;
 	window.height = 800;
 	window.spriteSize = 64;
 	window.iso = Crafty.isometric.size(window.spriteSize);
-	
+
 	/*
 	 * Declare sprite resources
 	 */
@@ -44,10 +44,10 @@ $(document).ready(function() {
 		grass22 : [2, 5, 1, 1],
 		grass23 : [3, 5, 1, 1]
 	});
-	
+
 	/*
 	 * Declare visible heights of the vertices for correct mapping
-	 * As with css its a clockwise declaration. 1 for hi, 0 for low.  
+	 * As with css its a clockwise declaration. 1 for hi, 0 for low.
 	 */
 	window.tileVisuals = [
 						[1, 1, 1, 1], 
@@ -75,13 +75,13 @@ $(document).ready(function() {
 						[0, 0, 0, 0], 
 						[0, 0, 0, 0]
 					];
-
+					
 	/*
 	 * This multidimensional array will hold the visuals for the whole map.
 	 * You can store this per tile, but I dont know how to read it out based on position.
 	 */
 	window.mapArray = [];
-	
+
 	var generateRandomFitinTile = function(x, y, noMatch) {
 		var tileNumber = Crafty.math.randomInt(0, 23);
 
@@ -98,7 +98,7 @@ $(document).ready(function() {
 				return;
 			}
 		}
-
+		
 		//if its not the first line(y=0)
 		if(y > 0) {
 			/*
@@ -134,7 +134,6 @@ $(document).ready(function() {
 		}
 		return tileNumber;
 	};
-
 	// Create the Crafty context with a specific window size
 	Crafty.init(window.width, window.height);
 
@@ -144,21 +143,31 @@ $(document).ready(function() {
 			var tileNumber;
 
 			do {
-				//reset to false to avoid infinite loop and too much elses.
 				tileNumber = generateRandomFitinTile(x, y);
 			} while(!tileNumber);
 
-			mapArray[y][x] = tileVisuals[tileNumber];
+			window.mapArray[y][x] = window.tileVisuals[tileNumber];
 
 			var tileType = 'grass' + tileNumber;
 
-			var tile = Crafty.e('2D, DOM,' + tileType).addComponent("Mouse").attr("id", String(y) + "-" + String(x)).attr("name", tileType).areaMap([32, 16], [64, 32], [32, 48], [0, 32]).bind('Click', function() {
-				console.log(this.attr("id"));
-				console.log(iso.px2pos(128, 48));
-				this.destroy();
-			});
-			iso.place(x, y, 0, tile);
+			var tile = Crafty.e('2D, DOM,' + tileType)
+						.addComponent("Mouse")
+						.attr("id", String(y) + "-" + String(x))
+						.attr("name", tileType)
+						.areaMap([32, 16], [64, 32], [32, 48], [0, 32])
+						.bind('Click', function(event) {
+							console.log(this.attr("id"));
+							var pos_x = event.offsetX?(event.offsetX):event.pageX;
+							var pos_y = event.offsetY?(event.offsetY):event.pageY;
+							//console.log(window.iso.px2pos(pos_x,pos_y));
+							console.log(pos_x);
+							console.log(pos_y);											
+							this.destroy();
+						});
+						
+			window.iso.place(x, y, 0, tile);
 		}
 	}
+	console.log(iso.centerAt());
+	window.iso.centerAt(700,500);
 });
-
